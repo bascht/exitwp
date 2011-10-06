@@ -95,7 +95,11 @@ def parse_wp_xml(file):
                 tag=''
                 if q.find(':') > 0: namespace, tag=q.split(':',1)
                 else: tag=q
-                result=i.find(ns[namespace]+tag).text
+                try:
+                    result=i.find(ns[namespace]+tag).text
+                except AttributeError:
+                    print "Could not find namespace " + ns[namespace]+tag + " in " + str(i.keys())
+                    result = ""
                 if unicode_wrap: result=unicode(result)
                 return result
 
@@ -268,7 +272,11 @@ def write_jekyll(data, target_format):
 
         if download_images:
             for img in i['img_srcs']:
-                urlretrieve(urljoin(data['header']['link'],img.decode('utf-8')), get_attachment_path(img, i['uid']))
+                url = urljoin(data['header']['link'],img.decode('utf-8'))
+                try:
+                    urlretrieve(url, get_attachment_path(img, i['uid']))
+                except IOError:
+                    print "Connection error when trying to download: " + url
 
 
         if out is not None:
